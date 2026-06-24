@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StudentHire — Job Portal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f1e;--surface:#111827;--card:#1a2235;--border:#1e2d45;
+  --blue:#3b82f6;--blue2:#2563eb;--green:#10b981;--amber:#f59e0b;
+  --red:#ef4444;--purple:#8b5cf6;
+  --txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+
+/* ── NAV ── */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 30px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.logo{font-size:20px;font-weight:700;color:var(--blue)}.logo span{color:var(--txt)}
+.nav-right{display:flex;gap:10px;align-items:center}
+#navUser{font-size:13px;color:var(--txt2)}
+.btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--txt2)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-red{background:var(--red);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* ── PAGES ── */
+.page{display:none;max-width:1100px;margin:0 auto;padding:30px 20px}
+.page.active{display:block}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:60px 20px 40px}
+.hero h1{font-size:42px;font-weight:800;line-height:1.2;margin-bottom:12px}
+.hero h1 span{color:var(--blue)}
+.hero p{color:var(--txt2);font-size:17px;max-width:520px;margin:0 auto 30px}
+.search-bar{display:flex;gap:10px;max-width:600px;margin:0 auto;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:180px;padding:12px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;outline:none}
+.search-bar input:focus{border-color:var(--blue)}
+.search-bar select{padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;outline:none}
+.stats-row{display:flex;justify-content:center;gap:40px;margin-top:40px;flex-wrap:wrap}
+.stat{text-align:center}.stat-n{font-size:28px;font-weight:700;color:var(--blue)}.stat-l{font-size:13px;color:var(--txt3);margin-top:2px}
+
+/* ── FILTERS ── */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;align-items:center}
+.filter-chip{padding:7px 16px;border-radius:99px;font-size:13px;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--txt2);transition:.2s}
+.filter-chip.active,.filter-chip:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* ── JOB GRID ── */
+.jobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.job-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;transition:border-color .2s,transform .2s;cursor:pointer}
+.job-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.job-card.saved{border-color:var(--amber)}
+.job-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.company-logo{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
+.save-btn{background:none;border:none;cursor:pointer;font-size:18px;color:var(--txt3);transition:.2s;padding:4px}
+.save-btn:hover,.save-btn.saved{color:var(--amber)}
+.job-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.job-company{font-size:13px;color:var(--txt2);margin-bottom:10px}
+.job-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tag{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.tag-blue{background:#1e3a5f;color:#93c5fd}
+.tag-green{background:#064e3b;color:#6ee7b7}
+.tag-purple{background:#2e1065;color:#c4b5fd}
+.tag-amber{background:#451a03;color:#fcd34d}
+.job-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--txt3);margin-bottom:14px}
+.apply-btn-card{width:100%;padding:9px;border-radius:8px;background:var(--blue);color:#fff;border:none;font-weight:600;font-size:13px;cursor:pointer;transition:.2s}
+.apply-btn-card:hover{background:var(--blue2)}
+.apply-btn-card.applied{background:#064e3b;color:#6ee7b7;cursor:default}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:#00000088;display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:30px}
+.modal h2{font-size:20px;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;color:var(--txt2);margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;outline:none;font-family:inherit}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--blue)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;border-top:1px solid var(--border);padding-top:18px}
+.close-btn{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--txt2);font-size:20px;cursor:pointer}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;border-radius:10px;font-size:14px;font-weight:500;z-index:999;animation:slideUp .3s ease;display:none}
+.toast.show{display:block}
+.toast-success{background:#064e3b;color:#6ee7b7;border:1px solid var(--green)}
+.toast-error{background:#450a0a;color:#fca5a5;border:1px solid var(--red)}
+.toast-info{background:#1e3a5f;color:#93c5fd;border:1px solid var(--blue)}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ── AUTH CARD ── */
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px;max-width:420px;margin:60px auto}
+.auth-card h2{font-size:22px;margin-bottom:8px}
+.auth-card p{color:var(--txt2);font-size:14px;margin-bottom:24px}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
+.auth-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:14px;color:var(--txt3);border-bottom:2px solid transparent;transition:.2s}
+.auth-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* ── DASHBOARD ── */
+.section-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px}
+.dash-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.dash-num{font-size:30px;font-weight:700;color:var(--blue)}
+.dash-lbl{font-size:12px;color:var(--txt3);margin-top:4px}
+.app-table{width:100%;border-collapse:collapse;font-size:13px}
+.app-table th{background:var(--bg);color:var(--txt3);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.app-table td{padding:12px;border-bottom:1px solid var(--border)}
+.app-table tr:hover td{background:#ffffff06}
+.status-badge{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.s-pending{background:#451a03;color:#fcd34d}
+.s-reviewed{background:#1e3a5f;color:#93c5fd}
+.s-shortlisted{background:#064e3b;color:#6ee7b7}
+.s-rejected{background:#450a0a;color:#fca5a5}
+.tabs{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap}
+.tab{padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;background:var(--card);border:1px solid var(--border);color:var(--txt2)}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.empty{text-align:center;color:var(--txt3);padding:40px;font-size:14px}
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto 14px}
+
+/* ── ADMIN ── */
+.admin-alert{background:#1e3a5f;border:1px solid var(--blue);border-radius:10px;padding:14px 18px;font-size:14px;color:#93c5fd;margin-bottom:20px}
+
+@media(max-width:600px){
+  .hero h1{font-size:28px}
+  .search-bar{flex-direction:column}
+  .form-row{grid-template-columns:1fr}
+  .stats-row{gap:20px}
+  nav{padding:12px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Student<span>Hire</span></div>
+  <div class="nav-right">
+    <span id="navUser"></span>
+    <button class="btn btn-outline btn-sm" id="dashBtn" onclick="showPage('dashPage')" style="display:none">Dashboard</button>
+    <button class="btn btn-outline btn-sm" id="jobsNavBtn" onclick="showPage('homePage')" style="display:none">Jobs</button>
+    <button class="btn btn-red btn-sm" id="logoutBtn" onclick="logout()" style="display:none">Logout</button>
+    <button class="btn btn-blue btn-sm" id="loginNavBtn" onclick="showPage('authPage')">Login</button>
+  </div>
+</nav>
+
+<!-- ════════════ HOME PAGE ════════════ -->
+<div class="page active" id="homePage">
+  <div class="hero">
+    <h1>Find Your <span>Dream Job</span><br>as a Student</h1>
+    <p>Internships, part-time and fresher jobs from top companies — all in one place.</p>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search job title, skill..." oninput="filterJobs()"/>
+      <select id="locationFilter" onchange="filterJobs()">
+        <option value="">All Locations</option>
+        <option>Hyderabad</option>
+        <option>Bengaluru</option>
+        <option>Chennai</option>
+        <option>Mumbai</option>
+        <option>Remote</option>
+      </select>
+      <button class="btn btn-blue" onclick="filterJobs()">Search</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-n" id="statJobs">0</div><div class="stat-lbl">Open Jobs</div></div>
+      <div class="stat"><div class="stat-n" id="statCompanies">0</div><div class="stat-lbl">Companies</div></div>
+      <div class="stat"><div class="stat-n" id="statApps">0</div><div class="stat-lbl">Applications</div></div>
+    </div>
+  </div>
+
+  <div class="filter-bar" id="filterBar"></div>
+  <div class="jobs-grid" id="jobsGrid"></div>
+</div>
+
+<!-- ════════════ AUTH PAGE ════════════ -->
+<div class="page" id="authPage">
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
+      <div class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</div>
+      <div class="auth-tab" onclick="switchAuthTab('admin')">Admin</div>
+    </div>
+    <!-- Login -->
+    <div id="loginForm">
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="loginPass" placeholder="Password"/></div>
+      <button class="btn btn-blue" style="width:100%" onclick="login()">Login</button>
+    </div>
+    <!-- Signup -->
+    <div id="signupForm" style="display:none">
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" id="signFirst" placeholder="Ravi"/></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="signLast" placeholder="Kumar"/></div>
+      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="signEmail" placeholder="you@email.com"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="signPass" placeholder="Min 6 characters"/></div>
+      <div class="form-group"><label>College</label><input type="text" id="signCollege" placeholder="Your college name"/></div>
+      <div class="form-group"><label>Course / Branch</label><input type="text" id="signCourse" placeholder="B.Tech CSE"/></div>
+      <button class="btn btn-blue" style="width:100%" onclick="signup()">Create Account</button>
+    </div>
+    <!-- Admin -->
+    <div id="adminForm" style="display:none">
+      <div class="form-group"><label>Admin Password</label><input type="password" id="adminPass" placeholder="Enter admin password"/></div>
+      <button class="btn btn-red" style="width:100%" onclick="adminLogin()">Admin Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ DASHBOARD PAGE ════════════ -->
+<div class="page" id="dashPage">
+  <div class="tabs">
+    <div class="tab active" onclick="switchDash('overview')">Overview</div>
+    <div class="tab" onclick="switchDash('applications')">My Applications</div>
+    <div class="tab" onclick="switchDash('saved')">Saved Jobs</div>
+    <div class="tab" onclick="switchDash('profile')">Profile</div>
+  </div>
+
+  <!-- Overview -->
+  <div id="dashOverview">
+    <div class="dash-grid" id="dashStats"></div>
+    <div class="section-title">Recent Applications</div>
+    <div id="recentApps"></div>
+  </div>
+  <!-- Applications -->
+  <div id="dashApplications" style="display:none">
+    <div class="section-title">All Applications</div>
+    <div id="allApps"></div>
+  </div>
+  <!-- Saved -->
+  <div id="dashSaved" style="display:none">
+    <div class="section-title">Saved Jobs</div>
+    <div class="jobs-grid" id="savedJobsGrid"></div>
+  </div>
+  <!-- Profile -->
+  <div id="dashProfile" style="display:none">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:500px">
+      <div class="profile-avatar" id="profileAvatar"></div>
+      <div id="profileInfo"></div>
+      <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:18px">
+        <div class="form-group"><label>Skills (comma separated)</label><input type="text" id="skillsInput" placeholder="React, Python, SQL..."/></div>
+        <div class="form-group"><label>Resume Link</label><input type="text" id="resumeInput" placeholder="Google Drive / Portfolio link"/></div>
+        <div class="form-group"><label>About Me</label><textarea id="aboutInput" placeholder="Brief intro..."></textarea></div>
+        <button class="btn btn-green" onclick="saveProfile()">Save Profile</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ADMIN PAGE ════════════ -->
+<div class="page" id="adminPage">
+  <div class="admin-alert">🛠️ Admin Dashboard — Manage jobs and view all applications</div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchAdmin('overview')">Overview</div>
+    <div class="tab" onclick="switchAdmin('jobs')">Manage Jobs</div>
+    <div class="tab" onclick="switchAdmin('applications')">All Applications</div>
+    <div class="tab" onclick="switchAdmin('users')">Users</div>
+  </div>
+
+  <div id="adminOverview">
+    <div class="dash-grid" id="adminStats"></div>
+  </div>
+  <div id="adminJobs" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="section-title" style="margin:0">All Job Listings</div>
+      <button class="btn btn-blue btn-sm" onclick="openAddJobModal()">+ Add Job</button>
+    </div>
+    <div id="adminJobsList"></div>
+  </div>
+  <div id="adminApplications" style="display:none">
+    <div class="section-title">All Applications</div>
+    <div id="adminAppsList"></div>
+  </div>
+  <div id="adminUsers" style="display:none">
+    <div class="section-title">Registered Users</div>
+    <div id="adminUsersList"></div>
+  </div>
+</div>
+
+<!-- ════════════ APPLY MODAL ════════════ -->
+<div class="modal-overlay" id="applyModal">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('applyModal')">✕</button>
+    <h2>Apply for <span id="applyJobTitle" style="color:var(--blue)"></span></h2>
+    <div class="form-group"><label>Full Name</label><input type="text" id="applyName"/></div>
+    <div class="form-group"><label>Email</label><input type="email" id="applyEmail"/></div>
+    <div class="form-group"><label>Phone</label><input type="text" id="applyPhone" placeholder="10-digit number"/></div>
+    <div class="form-group"><label>Resume / Portfolio Link</label><input type="text" id="applyResume" placeholder="Google Drive or GitHub link"/></div>
+    <div class="form-group"><label>Cover Letter (optional)</label><textarea id="applyCover" placeholder="Why are you a good fit?"></textarea></div>
+    <div class="form-group"><label>Years of Experience</label>
+      <select id="applyExp">
+        <option>Fresher (0 years)</option>
+        <option>Less than 1 year</option>
+        <option>1–2 years</option>
+        <option>2+ years</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('applyModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="submitApplication()">Submit Application</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ JOB DETAIL MODAL ════════════ -->
+<div class="modal-overlay" id="jobModal">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('jobModal')">✕</button>
+    <div id="jobModalContent"></div>
+  </div>
+</div>
+
+<!-- ════════════ ADD JOB MODAL ════════════ -->
+<div class="modal-overlay" id="addJobModal">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('addJobModal')">✕</button>
+    <h2>Add New Job</h2>
+    <div class="form-row">
+      <div class="form-group"><label>Job Title</label><input type="text" id="njTitle" placeholder="Web Developer Intern"/></div>
+      <div class="form-group"><label>Company</label><input type="text" id="njCompany" placeholder="ABC Tech"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Location</label>
+        <select id="njLocation">
+          <option>Hyderabad</option><option>Bengaluru</option><option>Chennai</option><option>Mumbai</option><option>Remote</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Type</label>
+        <select id="njType"><option>Internship</option><option>Part-time</option><option>Full-time</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Stipend / Salary</label><input type="text" id="njStipend" placeholder="₹15,000/month"/></div>
+      <div class="form-group"><label>Domain</label>
+        <select id="njDomain">
+          <option>Technology</option><option>Design</option><option>Marketing</option><option>Finance</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Skills Required (comma separated)</label><input type="text" id="njSkills" placeholder="React, Node.js, SQL"/></div>
+    <div class="form-group"><label>Job Description</label><textarea id="njDesc" placeholder="Describe the role and responsibilities..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addJobModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="addJob()">Post Job</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  IN-MEMORY DATABASE
+// ══════════════════════════════════════════
+const DB = {
+  users: [
+    { id:1, firstName:"Demo", lastName:"Student", email:"demo@student.com", password:"demo123", college:"JNTU Hyderabad", course:"B.Tech CSE", skills:"React, Python", resume:"", about:"", role:"student" }
+  ],
+  applications: [],
+  savedJobs: {},   // userId → Set of jobIds
+  jobs: [
+    { id:1, title:"Web Developer Intern", company:"ABC Technologies", location:"Hyderabad", type:"Internship", stipend:"₹15,000/month", domain:"Technology", skills:["HTML","CSS","JavaScript","React"], desc:"Build responsive web applications and collaborate with the product team on new features.", logo:"🖥️", color:"#1e3a5f", posted:"2 days ago" },
+    { id:2, title:"Java Backend Developer", company:"XYZ Solutions", location:"Bengaluru", type:"Full-time", stipend:"₹30,000/month", domain:"Technology", skills:["Java","Spring Boot","MySQL"], desc:"Develop and maintain backend services for our enterprise clients using Java and Spring Boot.", logo:"☕", color:"#064e3b", posted:"1 day ago" },
+    { id:3, title:"UI/UX Design Intern", company:"DesignCo", location:"Remote", type:"Internship", stipend:"₹10,000/month", domain:"Design", skills:["Figma","Adobe XD","Prototyping"], desc:"Create wireframes and high-fidelity prototypes for our mobile and web products.", logo:"🎨", color:"#2e1065", posted:"3 days ago" },
+    { id:4, title:"Data Analyst Intern", company:"DataFirst", location:"Chennai", type:"Internship", stipend:"₹12,000/month", domain:"Technology", skills:["Python","SQL","Pandas","Excel"], desc:"Analyse large datasets, build dashboards, and derive actionable business insights.", logo:"📊", color:"#451a03", posted:"4 days ago" },
+    { id:5, title:"Digital Marketing Exec", company:"GrowthLabs", location:"Mumbai", type:"Part-time", stipend:"₹18,000/month", domain:"Marketing", skills:["SEO","Social Media","Content","Analytics"], desc:"Run social media campaigns and SEO strategies for our growing client portfolio.", logo:"📱", color:"#1e1b4b", posted:"Today" },
+    { id:6, title:"React Native Developer", company:"AppWorks", location:"Hyderabad", type:"Full-time", stipend:"₹40,000/month", domain:"Technology", skills:["React Native","JavaScript","Firebase"], desc:"Build cross-platform mobile applications for iOS and Android using React Native.", logo:"📲", color:"#1e3a5f", posted:"Today" },
+  ],
+  nextUserId: 2,
+  nextAppId:  1,
+  nextJobId:  7,
+  ADMIN_PASS: "admin123",
+};
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let state = { user: null, isAdmin: false, currentJob: null, filteredJobs: [...DB.jobs] };
+
+// ══════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════
+window.onload = () => {
+  renderJobs(DB.jobs);
+  updateHomeStats();
+  setCategories();
+};
+
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+function signup() {
+  const f = v => v.value.trim();
+  const first=f(document.getElementById("signFirst")), last=f(document.getElementById("signLast")),
+        email=f(document.getElementById("signEmail")), pass=f(document.getElementById("signPass")),
+        college=f(document.getElementById("signCollege")), course=f(document.getElementById("signCourse"));
+  if (!first||!email||!pass) return toast("Fill required fields","error");
+  if (pass.length<6) return toast("Password must be 6+ characters","error");
+  if (DB.users.find(u=>u.email===email)) return toast("Email already registered","error");
+  const user = { id:DB.nextUserId++, firstName:first, lastName:last, email, password:pass, college, course, skills:"", resume:"", about:"", role:"student" };
+  DB.users.push(user);
+  DB.savedJobs[user.id] = new Set();
+  setUser(user);
+  toast("Account created! Welcome "+first+"🎉","success");
+}
+
+function login() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass  = document.getElementById("loginPass").value;
+  const user  = DB.users.find(u=>u.email===email&&u.password===pass);
+  if (!user) return toast("Invalid email or password","error");
+  if (!DB.savedJobs[user.id]) DB.savedJobs[user.id] = new Set();
+  setUser(user);
+  toast("Welcome back, "+user.firstName+"!","success");
+}
+
+function adminLogin() {
+  if (document.getElementById("adminPass").value !== DB.ADMIN_PASS)
+    return toast("Wrong admin password","error");
+  state.isAdmin = true;
+  state.user = null;
+  document.getElementById("navUser").textContent = "👤 Admin";
+  document.getElementById("logoutBtn").style.display = "inline-block";
+  document.getElementById("loginNavBtn").style.display = "none";
+  document.getElementById("dashBtn").style.display = "none";
+  document.getElementById("jobsNavBtn").style.display = "inline-block";
+  showPage("adminPage");
+  loadAdminOverview();
+  toast("Admin access granted","info");
+}
+
+function setUser(user) {
+  state.user = user;
+  document.getElementById("navUser").textContent = "👤 "+user.firstName;
+  document.getElementById("logoutBtn").style.display = "inline-block";
+  document.getElementById("dashBtn").style.display = "inline-block";
+  document.getElementById("jobsNavBtn").style.display = "inline-block";
+  document.getElementById("loginNavBtn").style.display = "none";
+  showPage("homePage");
+  renderJobs(state.filteredJobs);
+}
+
+function logout() {
+  state = { user:null, isAdmin:false, currentJob:null, filteredJobs:[...DB.jobs] };
+  document.getElementById("navUser").textContent = "";
+  ["logoutBtn","dashBtn","jobsNavBtn"].forEach(id=>document.getElementById(id).style.display="none");
+  document.getElementById("loginNavBtn").style.display = "inline-block";
+  showPage("homePage");
+  renderJobs(DB.jobs);
+  toast("Logged out","info");
+}
+
+// ══════════════════════════════════════════
+//  JOBS
+// ══════════════════════════════════════════
+function setCategories() {
+  const domains = ["All",...new Set(DB.jobs.map(j=>j.domain))];
+  document.getElementById("filterBar").innerHTML = domains.map((d,i)=>
+    `<div class="filter-chip ${i===0?"active":""}" onclick="filterByDomain(this,'${d}')">${d}</div>`
+  ).join("");
+}
+
+function filterByDomain(el, domain) {
+  document.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  const base = domain==="All" ? DB.jobs : DB.jobs.filter(j=>j.domain===domain);
+  state.filteredJobs = base;
+  filterJobs();
+}
+
+function filterJobs() {
+  const q    = document.getElementById("searchInput").value.toLowerCase();
+  const loc  = document.getElementById("locationFilter").value;
+  const base = state.filteredJobs.length ? state.filteredJobs : DB.jobs;
+  const res  = base.filter(j =>
+    (!q || j.title.toLowerCase().includes(q) || j.skills.join(" ").toLowerCase().includes(q) || j.company.toLowerCase().includes(q)) &&
+    (!loc || j.location===loc)
+  );
+  renderJobs(res);
+}
+
+function renderJobs(jobs) {
+  const grid = document.getElementById("jobsGrid");
+  if (!jobs.length) { grid.innerHTML=`<div class="empty" style="grid-column:1/-1">No jobs found matching your search.</div>`; return; }
+  const savedSet = state.user ? (DB.savedJobs[state.user.id]||new Set()) : new Set();
+  const appliedSet = new Set(DB.applications.filter(a=>state.user&&a.userId===state.user.id).map(a=>a.jobId));
+  grid.innerHTML = jobs.map(j=>`
+    <div class="job-card ${savedSet.has(j.id)?"saved":""}" onclick="openJobDetail(${j.id})">
+      <div class="job-header">
+        <div class="company-logo" style="background:${j.color}20;color:${j.color}">${j.logo}</div>
+        <button class="save-btn ${savedSet.has(j.id)?"saved":""}" onclick="event.stopPropagation();toggleSave(${j.id},this)" title="Save job">${savedSet.has(j.id)?"★":"☆"}</button>
+      </div>
+      <div class="job-title">${j.title}</div>
+      <div class="job-company">${j.company} · ${j.location}</div>
+      <div class="job-tags">
+        <span class="tag tag-blue">${j.type}</span>
+        <span class="tag tag-green">${j.stipend}</span>
+        ${j.skills.slice(0,2).map(s=>`<span class="tag tag-purple">${s}</span>`).join("")}
+      </div>
+      <div class="job-meta"><span>📍 ${j.location}</span><span>🕐 ${j.posted}</span></div>
+      <button class="apply-btn-card ${appliedSet.has(j.id)?"applied":""}" onclick="event.stopPropagation();${appliedSet.has(j.id)?"":"openApply("+j.id+")"}">
+        ${appliedSet.has(j.id)?"✅ Applied":"Apply Now"}
+      </button>
+    </div>
+  `).join("");
+  document.getElementById("statJobs").textContent = DB.jobs.length;
+  document.getElementById("statCompanies").textContent = new Set(DB.jobs.map(j=>j.company)).size;
+  document.getElementById("statApps").textContent = DB.applications.length;
+}
+
+function openJobDetail(id) {
+  const j = DB.jobs.find(j=>j.id===id);
+  if (!j) return;
+  const applied = state.user && DB.applications.find(a=>a.userId===state.user.id&&a.jobId===id);
+  document.getElementById("jobModalContent").innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div class="company-logo" style="background:${j.color}20;color:${j.color};width:56px;height:56px;font-size:24px;border-radius:12px;display:flex;align-items:center;justify-content:center">${j.logo}</div>
+      <div><div style="font-size:20px;font-weight:700">${j.title}</div><div style="color:var(--txt2);font-size:14px">${j.company}</div></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
+      <span class="tag tag-blue">${j.type}</span>
+      <span class="tag tag-green">${j.stipend}</span>
+      <span class="tag tag-amber">📍 ${j.location}</span>
+      <span class="tag tag-purple">🕐 ${j.posted}</span>
+    </div>
+    <div style="color:var(--txt2);font-size:14px;line-height:1.7;margin-bottom:18px">${j.desc}</div>
+    <div style="margin-bottom:18px"><div style="font-size:13px;color:var(--txt3);margin-bottom:8px">Skills Required</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${j.skills.map(s=>`<span class="tag tag-purple">${s}</span>`).join("")}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--border)">
+      ${applied
+        ? `<div class="btn btn-green" style="pointer-events:none">✅ Already Applied</div>`
+        : `<button class="btn btn-blue" onclick="closeModal('jobModal');openApply(${j.id})">Apply Now</button>`}
+      <button class="btn btn-outline" onclick="toggleSave(${j.id},null);closeModal('jobModal')">${state.user&&(DB.savedJobs[state.user.id]||new Set()).has(j.id)?"★ Saved":"☆ Save Job"}</button>
+    </div>
+  `;
+  openModal("jobModal");
+}
+
+function toggleSave(jobId, btn) {
+  if (!state.user) { toast("Login to save jobs","error"); showPage("authPage"); return; }
+  const set = DB.savedJobs[state.user.id];
+  if (set.has(jobId)) { set.delete(jobId); toast("Job removed from saved","info"); }
+  else { set.add(jobId); toast("Job saved! ⭐","success"); }
+  renderJobs(state.filteredJobs.length ? state.filteredJobs : DB.jobs);
+}
+
+// ══════════════════════════════════════════
+//  APPLY
+// ══════════════════════════════════════════
+function openApply(jobId) {
+  if (!state.user) { toast("Login to apply","error"); showPage("authPage"); return; }
+  const j = DB.jobs.find(j=>j.id===jobId);
+  state.currentJob = jobId;
+  document.getElementById("applyJobTitle").textContent = j.title;
+  document.getElementById("applyName").value  = state.user.firstName+" "+state.user.lastName;
+  document.getElementById("applyEmail").value = state.user.email;
+  document.getElementById("applyResume").value= state.user.resume||"";
+  openModal("applyModal");
+}
+
+function submitApplication() {
+  const name   = document.getElementById("applyName").value.trim();
+  const email  = document.getElementById("applyEmail").value.trim();
+  const phone  = document.getElementById("applyPhone").value.trim();
+  const resume = document.getElementById("applyResume").value.trim();
+  if (!name||!email||!phone||!resume) return toast("Fill all required fields","error");
+  if (!/^\d{10}$/.test(phone)) return toast("Enter a valid 10-digit phone number","error");
+  const j = DB.jobs.find(j=>j.id===state.currentJob);
+  DB.applications.push({
+    id: DB.nextAppId++,
+    userId:    state.user.id,
+    jobId:     state.currentJob,
+    jobTitle:  j.title,
+    company:   j.company,
+    name, email, phone, resume,
+    cover:     document.getElementById("applyCover").value,
+    exp:       document.getElementById("applyExp").value,
+    status:    "Pending",
+    appliedOn: new Date().toLocaleDateString(),
+  });
+  closeModal("applyModal");
+  document.getElementById("applyPhone").value="";
+  document.getElementById("applyCover").value="";
+  toast("Application submitted for "+j.title+"! 🎉","success");
+  renderJobs(state.filteredJobs.length ? state.filteredJobs : DB.jobs);
+  updateHomeStats();
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════
+function switchDash(tab) {
+  ["Overview","Applications","Saved","Profile"].forEach(t=>{
+    document.getElementById("dash"+t).style.display = t.toLowerCase()===tab?"block":"none";
+  });
+  document.querySelectorAll("#dashPage .tab").forEach((t,i)=>{
+    t.classList.toggle("active",["overview","applications","saved","profile"][i]===tab);
+  });
+  if (tab==="overview")      loadDashOverview();
+  if (tab==="applications")  loadDashApplications();
+  if (tab==="saved")         loadSavedJobs();
+  if (tab==="profile")       loadProfile();
+}
+
+function loadDashOverview() {
+  if (!state.user) return;
+  const myApps = DB.applications.filter(a=>a.userId===state.user.id);
+  const saved  = DB.savedJobs[state.user.id]||new Set();
+  document.getElementById("dashStats").innerHTML = `
+    <div class="dash-card"><div class="dash-num">${myApps.length}</div><div class="dash-lbl">Applications</div></div>
+    <div class="dash-card"><div class="dash-num">${saved.size}</div><div class="dash-lbl">Saved Jobs</div></div>
+    <div class="dash-card"><div class="dash-num">${myApps.filter(a=>a.status==="Shortlisted").length}</div><div class="dash-lbl">Shortlisted</div></div>
+    <div class="dash-card"><div class="dash-num">${DB.jobs.length}</div><div class="dash-lbl">Open Jobs</div></div>
+  `;
+  const recent = myApps.slice(-5).reverse();
+  document.getElementById("recentApps").innerHTML = recent.length
+    ? appsTable(recent) : `<div class="empty">No applications yet. <a href="#" onclick="showPage('homePage')" style="color:var(--blue)">Browse jobs</a></div>`;
+}
+
+function loadDashApplications() {
+  const myApps = DB.applications.filter(a=>a.userId===state.user.id).reverse();
+  document.getElementById("allApps").innerHTML = myApps.length ? appsTable(myApps) : `<div class="empty">No applications yet.</div>`;
+}
+
+function appsTable(apps) {
+  return `<div style="overflow-x:auto"><table class="app-table">
+    <thead><tr><th>Job</th><th>Company</th><th>Applied On</th><th>Status</th></tr></thead>
+    <tbody>${apps.map(a=>`
+      <tr>
+        <td>${a.jobTitle}</td>
+        <td>${a.company}</td>
+        <td>${a.appliedOn}</td>
+        <td><span class="status-badge s-${a.status.toLowerCase()}">${a.status}</span></td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+function loadSavedJobs() {
+  const saved  = DB.savedJobs[state.user.id]||new Set();
+  const jobs   = DB.jobs.filter(j=>saved.has(j.id));
+  const grid   = document.getElementById("savedJobsGrid");
+  if (!jobs.length) { grid.innerHTML=`<div class="empty">No saved jobs yet.</div>`; return; }
+  state.filteredJobs = jobs;
+  grid.innerHTML = "";
+  const tmp = document.createElement("div");
+  tmp.className = "jobs-grid";
+  document.getElementById("savedJobsGrid").appendChild(tmp);
+  renderJobsInto(tmp, jobs);
+}
+
+function renderJobsInto(container, jobs) {
+  const savedSet   = DB.savedJobs[state.user.id]||new Set();
+  const appliedSet = new Set(DB.applications.filter(a=>a.userId===state.user.id).map(a=>a.jobId));
+  container.innerHTML = jobs.map(j=>`
+    <div class="job-card saved" onclick="openJobDetail(${j.id})">
+      <div class="job-header">
+        <div class="company-logo" style="background:${j.color}20;color:${j.color}">${j.logo}</div>
+        <button class="save-btn saved" onclick="event.stopPropagation();toggleSave(${j.id},this)">★</button>
+      </div>
+      <div class="job-title">${j.title}</div>
+      <div class="job-company">${j.company} · ${j.location}</div>
+      <div class="job-tags"><span class="tag tag-blue">${j.type}</span><span class="tag tag-green">${j.stipend}</span></div>
+      <button class="apply-btn-card ${appliedSet.has(j.id)?"applied":""}" onclick="event.stopPropagation();${appliedSet.has(j.id)?"":"openApply("+j.id+")"}">
+        ${appliedSet.has(j.id)?"✅ Applied":"Apply Now"}
+      </button>
+    </div>
+  `).join("");
+}
+
+function loadProfile() {
+  const u = state.user;
+  document.getElementById("profileAvatar").textContent = u.firstName[0]+u.lastName[0];
+  document.getElementById("profileInfo").innerHTML = `
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:18px;font-weight:700">${u.firstName} ${u.lastName}</div>
+      <div style="color:var(--txt2);font-size:13px">${u.email}</div>
+      <div style="color:var(--txt3);font-size:13px">${u.college} · ${u.course}</div>
+    </div>`;
+  document.getElementById("skillsInput").value  = u.skills||"";
+  document.getElementById("resumeInput").value  = u.resume||"";
+  document.getElementById("aboutInput").value   = u.about||"";
+}
+
+function saveProfile() {
+  state.user.skills = document.getElementById("skillsInput").value;
+  state.user.resume = document.getElementById("resumeInput").value;
+  state.user.about  = document.getElementById("aboutInput").value;
+  toast("Profile saved ✅","success");
+}
+
+// ══════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════
+function switchAdmin(tab) {
+  ["Overview","Jobs","Applications","Users"].forEach(t=>{
+    document.getElementById("admin"+t).style.display = t.toLowerCase()===tab?"block":"none";
+  });
+  document.querySelectorAll("#adminPage .tab").forEach((t,i)=>{
+    t.classList.toggle("active",["overview","jobs","applications","users"][i]===tab);
+  });
+  if (tab==="overview")      loadAdminOverview();
+  if (tab==="jobs")          loadAdminJobs();
+  if (tab==="applications")  loadAdminApplications();
+  if (tab==="users")         loadAdminUsers();
+}
+
+function loadAdminOverview() {
+  document.getElementById("adminStats").innerHTML = `
+    <div class="dash-card"><div class="dash-num" style="color:var(--blue)">${DB.jobs.length}</div><div class="dash-lbl">Total Jobs</div></div>
+    <div class="dash-card"><div class="dash-num" style="color:var(--green)">${DB.applications.length}</div><div class="dash-lbl">Applications</div></div>
+    <div class="dash-card"><div class="dash-num" style="color:var(--purple)">${DB.users.length}</div><div class="dash-lbl">Registered Users</div></div>
+    <div class="dash-card"><div class="dash-num" style="color:var(--amber)">${new Set(DB.jobs.map(j=>j.company)).size}</div><div class="dash-lbl">Companies</div></div>
+  `;
+}
+
+function loadAdminJobs() {
+  document.getElementById("adminJobsList").innerHTML = `<div style="overflow-x:auto"><table class="app-table">
+    <thead><tr><th>Title</th><th>Company</th><th>Location</th><th>Type</th><th>Applications</th><th>Action</th></tr></thead>
+    <tbody>${DB.jobs.map(j=>`
+      <tr>
+        <td>${j.logo} ${j.title}</td>
+        <td>${j.company}</td>
+        <td>${j.location}</td>
+        <td><span class="tag tag-blue">${j.type}</span></td>
+        <td>${DB.applications.filter(a=>a.jobId===j.id).length}</td>
+        <td><button class="btn btn-red btn-sm" onclick="deleteJob(${j.id})">Delete</button></td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+function loadAdminApplications() {
+  const apps = [...DB.applications].reverse();
+  document.getElementById("adminAppsList").innerHTML = apps.length
+    ? `<div style="overflow-x:auto"><table class="app-table">
+        <thead><tr><th>Name</th><th>Job</th><th>Company</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>${apps.map(a=>`
+          <tr>
+            <td>${a.name}</td>
+            <td>${a.jobTitle}</td>
+            <td>${a.company}</td>
+            <td>${a.appliedOn}</td>
+            <td><span class="status-badge s-${a.status.toLowerCase()}">${a.status}</span></td>
+            <td><select onchange="changeStatus(${a.id},this.value)" style="background:var(--card);color:var(--txt);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px">
+              ${["Pending","Reviewed","Shortlisted","Rejected"].map(s=>`<option ${a.status===s?"selected":""}>${s}</option>`).join("")}
+            </select></td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>`
+    : `<div class="empty">No applications yet.</div>`;
+}
+
+function loadAdminUsers() {
+  document.getElementById("adminUsersList").innerHTML = `<div style="overflow-x:auto"><table class="app-table">
+    <thead><tr><th>Name</th><th>Email</th><th>College</th><th>Course</th><th>Applications</th></tr></thead>
+    <tbody>${DB.users.map(u=>`
+      <tr>
+        <td>${u.firstName} ${u.lastName}</td>
+        <td>${u.email}</td>
+        <td>${u.college}</td>
+        <td>${u.course}</td>
+        <td>${DB.applications.filter(a=>a.userId===u.id).length}</td>
+      </tr>`).join("")}
+    </tbody>
+  </table></div>`;
+}
+
+function changeStatus(appId, status) {
+  const app = DB.applications.find(a=>a.id===appId);
+  if (app) { app.status=status; toast("Status updated to "+status,"success"); }
+}
+
+function deleteJob(id) {
+  if (!confirm("Delete this job listing?")) return;
+  DB.jobs.splice(DB.jobs.findIndex(j=>j.id===id),1);
+  toast("Job deleted","info");
+  loadAdminJobs();
+  loadAdminOverview();
+}
+
+function openAddJobModal() { openModal("addJobModal"); }
+
+function addJob() {
+  const g = id => document.getElementById(id).value.trim();
+  const title=g("njTitle"),company=g("njCompany"),skills=g("njSkills"),desc=g("njDesc");
+  if (!title||!company||!desc) return toast("Fill all required fields","error");
+  DB.jobs.push({
+    id: DB.nextJobId++,
+    title, company,
+    location: g("njLocation"), type: g("njType"), stipend: g("njStipend"),
+    domain: g("njDomain"),
+    skills: skills.split(",").map(s=>s.trim()).filter(Boolean),
+    desc, logo:"💼", color:"#1e3a5f", posted:"Just now"
+  });
+  closeModal("addJobModal");
+  ["njTitle","njCompany","njSkills","njDesc","njStipend"].forEach(id=>document.getElementById(id).value="");
+  toast("Job posted successfully! ✅","success");
+  loadAdminJobs();
+  loadAdminOverview();
+  renderJobs(DB.jobs);
+  setCategories();
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id==="dashPage") { switchDash("overview"); }
+  if (id==="adminPage") { switchAdmin("overview"); }
+  if (id==="homePage") { renderJobs(DB.jobs); updateHomeStats(); }
+}
+
+function updateHomeStats() {
+  document.getElementById("statJobs").textContent      = DB.jobs.length;
+  document.getElementById("statCompanies").textContent = new Set(DB.jobs.map(j=>j.company)).size;
+  document.getElementById("statApps").textContent      = DB.applications.length;
+}
+
+function switchAuthTab(tab) {
+  ["login","signup","admin"].forEach(t=>{
+    document.getElementById(t+"Form").style.display = t===tab?"block":"none";
+  });
+  document.querySelectorAll(".auth-tab").forEach((t,i)=>{
+    t.classList.toggle("active",["login","signup","admin"][i]===tab);
+  });
+}
+
+function openModal(id)  { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+// Close modal on overlay click
+document.querySelectorAll(".modal-overlay").forEach(o=>{
+  o.addEventListener("click", e=>{ if(e.target===o) o.classList.remove("open"); });
+});
+
+function toast(msg, type="info") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = `toast toast-${type} show`;
+  setTimeout(()=>el.classList.remove("show"), 3500);
+}
+
+// Enter key on login
+document.getElementById("loginPass").addEventListener("keydown",e=>{ if(e.key==="Enter") login(); });
+document.getElementById("adminPass").addEventListener("keydown",e=>{ if(e.key==="Enter") adminLogin(); });
+</script>
+</body>
+</html>
